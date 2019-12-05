@@ -5,18 +5,33 @@
   (map read-string (clojure.string/split input #"-")))
 
 
-(defn double-digits? [n]
+(defn password-validator [rules]
+  (fn [password]
+    (every? true? (map #(% password) rules))))
+
+
+(defn double-digits? 
+  "Implementation for part 1. Any digit that occurs more than once is considered valid.
+
+   A set (#{}) automatically de-duplicates anything put into it, so if there are duplicate digits,
+   the set will contain less items than the number itself."
+  [n]
   (let [s (str n)
         digits (into #{} s)]
     (not= (count s) (count digits))))
 
 
-(defn double-digits-2? [n]
+(defn double-digits-2? 
+  "Implementation for part 2. Only digits that occur exactly twice are considered valid.
+
+   I create a map which counts the occurence of each digit within the number, then look
+   for any digit occurring exactly twice."
+  [n]
   (let [digit-count (reduce (fn [m c]
                               (update m c #(inc (or % 0)))) 
                             {} 
                             (str n))]
-    (some (partial = 2) (vals digit-count))))
+    (some #(= 2 %) (vals digit-count))))
 
 
 (defn never-decreases? [n]
@@ -24,14 +39,9 @@
     (= (apply list digits) (sort digits))))
 
 
-(defn password-validator [rules]
-  (fn [password]
-    (reduce #(and %1 %2) (map #(% password) rules))))
-
-
 (defn generate-valid-passwords [input rules]
   (let [[start end] (parse-input input)]
-    (filter (password-validator rules) (range start end))))
+    (filter (password-validator rules) (range start (inc end)))))
 
 
 (defn part-1 [input]
